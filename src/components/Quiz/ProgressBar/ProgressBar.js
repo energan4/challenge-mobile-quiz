@@ -1,16 +1,30 @@
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Animated} from 'react-native';
 import Colors from '../../../utils/Colors';
+import {setBarAnimation} from '../../../utils/animationUtils';
 
 export default function ProgressBar(props) {
-  const position = props.position;
-  const questionsNumber = props.questionsNumber;
-  const width = (position / questionsNumber) * 100;
+  const {position, questionsNumber} = props;
+
+  const progress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    setBarAnimation(progress, position);
+  });
+
+  const progressAnim = progress.interpolate({
+    inputRange: [0, questionsNumber],
+    outputRange: ['0%', '100%'],
+  });
+
+  const barWidth = {
+    width: progressAnim,
+  };
 
   return (
-    <View style={styles.progressContainer}>
-      <View style={[styles.progressBar, {width: width + '%'}]} />
+    <View style={[styles.progressContainer]}>
+      <Animated.View style={[styles.progressBar, barWidth]} />
     </View>
   );
 }
@@ -21,7 +35,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light,
   },
   progressBar: {
-    width: '100%',
     height: 20,
     backgroundColor: Colors.dark,
   },
